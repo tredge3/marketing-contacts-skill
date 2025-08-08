@@ -53,9 +53,6 @@ nodes:
 Ensure these are set in your `.env` file:
 
 ```bash
-# Snowflake configuration
-SNOWFLAKE_DB_NAME_SCHEMA_NAME="ANALYTICS_DB.ANALYTICS_AI4SALES_BR"
-
 # User configuration
 USER_ID="your_user_id"
 ```
@@ -84,37 +81,6 @@ def get_contacts_df(savm_id: str):
     LIMIT 10
     """
     # ... rest of function
-```
-
-### Adding Role-Based Access
-
-To implement customer-specific access:
-
-```python
-from ...utils.users.users import get_cec_id_from_config
-
-@with_db_connection()
-def get_contacts_df(savm_id: str):
-    cec_id = get_cec_id_from_config()
-    
-    query = """
-    WITH customer_access AS (
-        SELECT * FROM get_customer_access_by_name_simplified(:cec_id)
-    )
-    SELECT m.* FROM MKTG_DB.MKTG_MOPS_BR.SALES_AI_MKTG_CONTACTS m
-    JOIN customer_access c ON m.SAVM_ACCOUNT_OR_COMPANY_ID = c.account_id
-    WHERE m.SAVM_ACCOUNT_OR_COMPANY_ID = :savm_id_sav
-       OR m.SAVM_ACCOUNT_OR_COMPANY_ID LIKE :savm_id_guc_pattern
-    LIMIT 10
-    """
-    
-    params = {
-        "cec_id": cec_id,
-        "savm_id_sav": f"SAV_{savm_id}",
-        "savm_id_guc_pattern": f"GUC_{savm_id}_%"
-    }
-    
-    return text(query), params
 ```
 
 ## Troubleshooting
@@ -171,9 +137,8 @@ def get_contacts_df(savm_id: str):
 
 1. **Always test** with sample SAV IDs before deployment
 2. **Implement proper error handling** for database failures
-3. **Use role-based access** to ensure data security
-4. **Monitor query performance** for large datasets
-5. **Document any customizations** for team members
+3. **Monitor query performance** for large datasets
+4. **Document any customizations** for team members
 
 ## Support
 
